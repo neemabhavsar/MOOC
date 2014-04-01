@@ -1,0 +1,62 @@
+/*
+ * copyright 2012, gash
+ * 
+ * Gash licenses this file to you under the Apache License,
+ * version 2.0 (the "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at:
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
+package poke.resources;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import poke.server.resources.Resource;
+import poke.server.resources.ResourceUtil;
+import eye.Comm.Payload;
+import eye.Comm.PokeStatus;
+import eye.Comm.Request;
+import eye.Comm.SignUp;
+
+public class JobResource implements Resource {
+	protected static Logger logger = LoggerFactory.getLogger("server");
+
+	@Override
+	public Request process(Request request) {
+		// TODO Auto-generated method stub
+		// TODO add code to process the message/event received
+		logger.info("Welcome: " + request.getBody().getSignUp().getFname()
+				+ " " + request.getBody().getSignUp().getLname());
+		// logger.info("poke: " + request.getBody().getPing().getTag());
+
+		Request.Builder rb = Request.newBuilder();
+
+		// metadata
+		rb.setHeader(ResourceUtil.buildHeaderFrom(request.getHeader(),
+				PokeStatus.SUCCESS, null));
+
+		// payload
+
+		Payload.Builder pb = Payload.newBuilder();
+		SignUp.Builder sb = SignUp.newBuilder();
+		sb.setEmail(request.getBody().getSignUp().getEmail());
+		sb.setPassword(request.getBody().getSignUp().getPassword());
+		sb.setFname(request.getBody().getSignUp().getFname());
+		sb.setLname(request.getBody().getSignUp().getLname());
+
+		pb.setSignUp(sb.build());
+		rb.setBody(pb.build());
+		Request reply = rb.build();
+
+		return reply;
+
+	}
+
+}
