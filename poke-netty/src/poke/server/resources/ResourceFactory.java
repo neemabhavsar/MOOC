@@ -78,7 +78,9 @@ public class ResourceFactory {
 		// is the message for this server?
 		if (header.hasToNode()) {
 			String iam = cfg.getServer().getProperty("node.id");
+			
 			if (iam.equalsIgnoreCase(header.getToNode()))
+				
 				; // fall through and process normally
 			else {
 				// forward request

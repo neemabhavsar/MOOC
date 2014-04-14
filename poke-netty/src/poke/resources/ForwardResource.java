@@ -20,6 +20,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import poke.client.comm.CommConnection;
 import poke.server.conf.NodeDesc;
 import poke.server.conf.ServerConf;
 import poke.server.resources.Resource;
@@ -61,6 +62,13 @@ public class ForwardResource implements Resource {
 		String nextNode = determineForwardNode(request);
 		if (nextNode != null) {
 			Request fwd = ResourceUtil.buildForwardMessage(request, cfg);
+			
+			try{
+				CommConnection conn = new CommConnection(cfg.getNearest().getNode(nextNode).getHost(),cfg.getNearest().getNode(nextNode).getPort());
+				conn.sendMessage(fwd);
+			}catch(Exception e){
+				e.printStackTrace();
+			}
 			return fwd;
 		} else {
 			Request reply = null;
@@ -70,6 +78,8 @@ public class ForwardResource implements Resource {
 			Request rtn = ResourceUtil.buildError(request.getHeader(), PokeStatus.NOREACHABLE, statusMsg);
 			return rtn;
 		}
+		
+
 	}
 
 	/**

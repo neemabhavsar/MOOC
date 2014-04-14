@@ -57,7 +57,7 @@ message JobDesc {
    optional NameValueSet options = 5;
 
    enum JobCode {
-       JOBUNKNOWN = 1;/
+       JOBUNKNOWN = 1;
        JOBRECEIVED = 2;
        JOBQUEUED = 3;
        JOBRUNNING = 4;

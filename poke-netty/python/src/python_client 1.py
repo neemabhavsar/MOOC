@@ -3,36 +3,14 @@ import struct
 import sys
 import socket
 import time
-import json
 
-def hexDump( chars, sep = ' ', width = 16):
-	while chars:
-		line = chars[:width]
-		chars = chars[width:]
-		line = line.ljust( width, '\000' )
-		print "%s%s%s" % ( sep.join( "%02x" % ord(c) for c in line ),
- 			 sep, quotechars( line ))
-
-def quotechars( chars ):
-	return ''.join( ['.', c][c.isalnum()] for c in chars )
-
-def hexdump(src, length=16):
-    FILTER = ''.join([(len(repr(chr(x))) == 3) and chr(x) or '.' for x in range(256)])
-    lines = []
-    for c in xrange(0, len(src), length):
-        chars = src[c:c+length]
-        hex = ' '.join(["%02x" % ord(x) for x in chars])
-        printable = ''.join(["%s" % ((ord(x) <= 127 and FILTER[ord(x)]) or '.') for x in chars])
-        lines.append("%04x  %-*s  %s\n" % (c, length*3, hex, printable))
-    return ''.join(lines)
 
 def serialize_and_send(request):
-
-	#Step 1 : Serialize Protobuf
+	#Serialize Protobuf
 	s = request.SerializeToString()
 	packed_len = struct.pack('>L', len(s))
-	
-	#Step 2: Socket Connection
+
+	#Socket Connection
 	sock=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 	server_address=('localhost',5570)
 	print('connecting to %s port %s' %server_address)
@@ -40,7 +18,7 @@ def serialize_and_send(request):
 	print 'sending message'
 	sock.sendall(packed_len + s)
 
-	#Step 3: Receive and Deserialize Message
+	# Receive at s, a message of type Request and close connection
 	return get_message(sock, comm_pb2.Request)
 	sock.close()
 
@@ -60,66 +38,19 @@ def handle_signUp():
 	request.header.time = long(time.time())
 	request.header.toNode = "zero" # Sending to node with node.id "zero"
 	request.body.job_op.action = request.body.job_op.ADDJOB
-	request.body.job_op.data.name_space = "signup"
-	request.body.job_op.data.owner_id = 1
-	request.body.job_op.data.job_id = "signup"
+	request.body.job_op.data.name_space = "sign_up"
+	request.body.job_op.data.owner_id = 1234
+	request.body.job_op.data.job_id = "1111"
 	request.body.job_op.data.status = request.body.job_op.data.JOBQUEUED
-	
-	request.body.job_op.data.options.node_type = request.body.job_op.data.options.NODE
-	nvm1 = request.body.job_op.data.options.node.add()
-	nvm1.name = "fname"
-	nvm1.value = fname
-	nvm1.node_type = request.body.job_op.data.options.VALUE
-	
-	nvm2 = request.body.job_op.data.options.node.add()
-	nvm2.name = "lname"
-	nvm2.value = lname
-	nvm2.node_type = request.body.job_op.data.options.VALUE
-
-	nvm3 = request.body.job_op.data.options.node.add()
-	nvm3.name = "email"
-	nvm3.value = email
-	nvm3.node_type = request.body.job_op.data.options.VALUE
-
-	nvm4 = request.body.job_op.data.options.node.add()
-	nvm4.name = "password"
-	nvm4.value = password
-	nvm4.node_type = request.body.job_op.data.options.VALUE
-
-	response = serialize_and_send(request)
-	print response.body.job_op.data.options.value
-	
+	request.body.signUp.password = password
+	request.body.signUp.fname = fname
+	request.body.signUp.lname = lname
 
 def handle_signin():
 	email = raw_input("Enter Email ID: ")
 	password = raw_input("Enter Password: ")
 
-	request = comm_pb2.Request()
-	request.header.routing_id = request.header.JOBS
-	request.header.originator = "client"
-	request.header.tag = "header for signup"
-	request.header.time = long(time.time())
-	request.header.toNode = "zero" # Sending to node with node.id "zero"
-	request.body.job_op.action = request.body.job_op.ADDJOB
-	request.body.job_op.data.name_space = "signin"
-	request.body.job_op.data.owner_id = 1
-	request.body.job_op.data.job_id = "signin"
-	request.body.job_op.data.status = request.body.job_op.data.JOBQUEUED
 
-	request.body.job_op.data.options.node_type = request.body.job_op.data.options.NODE
-	nvm3 = request.body.job_op.data.options.node.add()
-	nvm3.name = "email"
-	nvm3.value = email
-	nvm3.node_type = request.body.job_op.data.options.VALUE
-
-	nvm4 = request.body.job_op.data.options.node.add()
-	nvm4.name = "password"
-	nvm4.value = password
-	nvm4.node_type = request.body.job_op.data.options.VALUE
-
-	response = serialize_and_send(request)
-	print response.body.job_op.data.options.value
-	
 def handle_list():
 	#Build for ListFiles
 	request = comm_pb2.Request()
@@ -127,23 +58,15 @@ def handle_list():
 	request.header.routing_id = request.header.JOBS
 	request.header.originator = "client"
 	request.header.tag = "header for list Files"
-
+	request.header.time = long(time.time())
+	request.header.toNode = "zero" # Sending to node with node.id "zero"
 	#Payload
 	request.body.job_op.action = request.body.job_op.ADDJOB
 	request.body.job_op.data.name_space = "listcourses"
 	request.body.job_op.data.owner_id = 1
 	request.body.job_op.data.job_id = "listcourses"
 	request.body.job_op.data.status = request.body.job_op.data.JOBQUEUED 
-	
-	response = serialize_and_send(request)
-	#Parsing Protobuf File
-	total_courses = len(response.body.job_op.data.options.node)
-
-	print "List Of Course ::"
-	print "##################################"
-	for i in range(0,total_courses ):
-		print response.body.job_op.data.options.node[i].value
-	print "##################################"
+	serialize_and_send(request)
 
 
 #Handle Request for Desc
@@ -171,7 +94,7 @@ def handle_desc():
 	response = serialize_and_send(request)
 
 	print "##################################"
-	print response.body.job_op.data.options.value 
+	print course_value + "::" +response.body.job_op.data.options.value
 	print "##################################"
 
 def get_message(sock, msgtype):
@@ -181,8 +104,9 @@ def get_message(sock, msgtype):
     len_buf = socket_read_n(sock, 4)
     msg_len = struct.unpack('>L', len_buf)[0]
     msg_buf = socket_read_n(sock, msg_len)
+
     msg = msgtype()
-    msg.ParseFromString(msg_buf);
+    msg.ParseFromString(msg_buf)
     return msg
 
 def socket_read_n(sock, n):
@@ -218,5 +142,5 @@ def main():
 if __name__ == '__main__':
     main()
 
-
+    
 

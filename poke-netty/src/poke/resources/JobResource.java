@@ -49,32 +49,31 @@ public class JobResource implements Resource {
 					+ " :: " +  request.getBody().getJobOp().getData().getOptions().getValue());
 			
 			//DB Call to Fetch
-			
-			
-			
-			
-			/*
-			SignUp.Builder sb = SignUp.newBuilder();
-			sb.setEmail(request.getBody().getSignUp().getEmail());
-			sb.setPassword(request.getBody().getSignUp().getPassword());
-			sb.setFname(request.getBody().getSignUp().getFname());
-			sb.setLname(request.getBody().getSignUp().getLname());
-			pb.setSignUp(sb.build());
-			*/
-			
-			// payload
+
 			
 			Payload.Builder pb = Payload.newBuilder();
 			
 			NameValueSet.Builder nb1 = NameValueSet.newBuilder();
 			nb1.setName("coursename");
-			nb1.setValue("cmpe277");
+			nb1.setValue("CMPE277");
 			nb1.setNodeType(NodeType.VALUE);
+			
+			
+			NameValueSet.Builder nb3 = NameValueSet.newBuilder();
+			nb3.setName("coursename");
+			nb3.setValue("CMPE273");
+			nb3.setNodeType(NodeType.VALUE);
+			
+			
+			NameValueSet.Builder nb4 = NameValueSet.newBuilder();
+			nb4.setName("coursename");
+			nb4.setValue("CMPE239");
+			nb4.setNodeType(NodeType.VALUE);
 			
 			
 			NameValueSet.Builder nb2 = NameValueSet.newBuilder();
 			nb2.setName("coursename");
-			nb2.setValue("cmpe275");
+			nb2.setValue("CMPE275");
 			nb2.setNodeType(NodeType.VALUE);
 			
 			
@@ -82,6 +81,8 @@ public class JobResource implements Resource {
 			main.setNodeType(NodeType.NODE);
 			main.addNode(0, nb1.build());
 			main.addNode(1, nb2.build());
+			main.addNode(2, nb3.build());
+			main.addNode(3, nb4.build());
 			
 			
 			
@@ -116,8 +117,11 @@ public class JobResource implements Resource {
 				desc = "Architectures, technologies, and programming concepts for developing smartphone applications. " +
 						"Covers current smartphone/tablet OSs, application development, and deployment environments. " +
 						"Prerequisites: Classified graduate standing or instructor consent";
+			}else if (request.getBody().getJobOp().getData().getOptions().getValue().equals("CMPE275"))
+			{
+				desc = "Enterprise Application Development ::: Distributed component design, scalability, messaging, and integration practices for modern and" +
+						" emerging architectures and technologies. Prerequisite: CMPE 273 or instructor consent.";
 			}
-			
 
 			Payload.Builder pb = Payload.newBuilder();
 			
@@ -156,21 +160,22 @@ public class JobResource implements Resource {
         String fname ="" , lname = "", email = "", pwd = "";
         if (request.getBody().getJobOp().getData().getOptions().getNode(0).getName().equals("fname"))
         	fname =  request.getBody().getJobOp().getData().getOptions().getNode(0).getValue();
-        if (request.getBody().getJobOp().getData().getOptions().getNode(0).getName().equals("lname"))
+        if (request.getBody().getJobOp().getData().getOptions().getNode(1).getName().equals("lname"))
         	lname = request.getBody().getJobOp().getData().getOptions().getNode(1).getValue();
-        if (request.getBody().getJobOp().getData().getOptions().getNode(0).getName().equals("email"))
+        if (request.getBody().getJobOp().getData().getOptions().getNode(2).getName().equals("email"))
             email = request.getBody().getJobOp().getData().getOptions().getNode(2).getValue();
-        if (request.getBody().getJobOp().getData().getOptions().getNode(0).getName().equals("password"))
+        if (request.getBody().getJobOp().getData().getOptions().getNode(3).getName().equals("password"))
             pwd = request.getBody().getJobOp().getData().getOptions().getNode(3).getValue();
+            
    	 
-    	logger.info(fname + "  " + lname + " " + email + " " + pwd);
+    	logger.info("##########"+ fname + "  " + lname + " " + email + " " + pwd + "##########");
 
    	 
     	Payload.Builder pb = Payload.newBuilder();
        	 
         	NameValueSet.Builder nb1 = NameValueSet.newBuilder();
         	nb1.setName("signup");
-        	nb1.setValue("signup successfull");
+        	nb1.setValue("Signup successfull - User Added to the Database");
         	nb1.setNodeType(NodeType.VALUE);
        	 
         	JobDesc.Builder jb = JobDesc.newBuilder();
@@ -194,25 +199,24 @@ public class JobResource implements Resource {
         	rb.setBody(pb.build());    	 
     }
 		else if(request.getBody().getJobOp().getData().getNameSpace().equals("signin")){
-   		 	logger.info("signin: " + request.getBody().getJobOp().getData().getOptions().getName()
+   		 	logger.info("##############signin: " + request.getBody().getJobOp().getData().getOptions().getName()
                 	+ " " + request.getBody().getJobOp().getData().getOptions().getValue());
                 
         String email = "", pwd = "";
         if (request.getBody().getJobOp().getData().getOptions().getNode(0).getName().equals("email"))
-            email = request.getBody().getJobOp().getData().getOptions().getNode(2).getValue();
+            email = request.getBody().getJobOp().getData().getOptions().getNode(0).getValue();
         if (request.getBody().getJobOp().getData().getOptions().getNode(0).getName().equals("password"))
-            pwd = request.getBody().getJobOp().getData().getOptions().getNode(3).getValue();
+            pwd = request.getBody().getJobOp().getData().getOptions().getNode(1).getValue();
    	 
     	logger.info(email + " " + pwd);
-
-   	 
+		
     	Payload.Builder pb = Payload.newBuilder();
        	 
         	NameValueSet.Builder nb1 = NameValueSet.newBuilder();
         	nb1.setName("signin");
-        	nb1.setValue("signin successfull");
+        	nb1.setValue("Sign-in Successfull :: User Credentials was Validated");
         	nb1.setNodeType(NodeType.VALUE);
-       	 
+        
         	JobDesc.Builder jb = JobDesc.newBuilder();
         	jb.setNameSpace("signin");
         	jb.setOwnerId(request.getBody().getJobOp().getData().getOwnerId());
@@ -233,7 +237,6 @@ public class JobResource implements Resource {
 
         	rb.setBody(pb.build());    	 
     }	
-
 
 		Request reply = rb.build();
 		return reply;
